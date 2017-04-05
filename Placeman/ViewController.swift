@@ -161,11 +161,39 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         })
     }
     
+    func callRemovePlace(placeName: String) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
+        let _:Bool = asyncConnect.removePlace(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        if ((dict?["result"]) != nil){
+                            NSLog("Place Removed")
+                        }
+                        else {
+                            NSLog("Place is not removed")
+                        }
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
     func dismissOpenKeyboard(){
         self.view.endEditing(true)
     }
     
     @IBAction func clickedBtnRemove(_ sender: Any) {
+        self.callRemovePlace(placeName: selectedPlace)
         _placeDictionary.removeValue(forKey: selectedPlace)
     }
     
