@@ -82,4 +82,19 @@ class MakeHttpConnection {
         return ret
     }
     
+    func addPlace(placeDict: [String:Any], callback: @escaping (String, String?) -> Void) -> Bool {
+        var ret:Bool = false
+        
+        do {
+            let dict:[String:Any] = ["jsonrpc":"2.0", "method":"add", "params":[placeDict], "id":"3"]
+            
+            let reqData:Data = try JSONSerialization.data(withJSONObject: dict, options: JSONSerialization.WritingOptions(rawValue: 0))
+            self.asyncHttpPostJSON(url: self.url, data:reqData, completion: callback)
+            ret = true
+        } catch let error as NSError {
+            print(error)
+        }
+        return ret
+    }
+    
 }

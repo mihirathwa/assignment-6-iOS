@@ -188,6 +188,33 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         })
     }
     
+    func callAddPlace(newPlace: [String:Any]) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
+        let _:Bool = asyncConnect.addPlace(placeDict: newPlace , callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        if ((dict?["result"]) != nil){
+                            NSLog("Place Added")
+                        }
+                        else {
+                            NSLog("Place is not added")
+                        }
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
     func dismissOpenKeyboard(){
         self.view.endEditing(true)
     }
@@ -219,6 +246,19 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                                                                     elevation: newPlaceElevation,
                                                                     latitude: newPlaceLatitude,
                                                                     longitude: newPlaceLongitude)
+            
+            let placeDict: [String: Any] = [
+                "name": newPlaceName,
+                "description": newPlaceDescription,
+                "category": newPlaceCategory,
+                "address-title": newPlaceAddressTitle,
+                "address-street": newPlaceAddressStreet,
+                "elevation": newPlaceElevation,
+                "latitude": newPlaceLatitude,
+                "longitude": newPlaceLongitude
+            ] as [String: Any]
+            
+            self.callAddPlace(newPlace: placeDict)
             
             _placeDictionary[newPlaceName] = newPlaceObject
             
