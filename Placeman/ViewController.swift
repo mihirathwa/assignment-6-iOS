@@ -42,6 +42,9 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     var selectedPlace = ""
     
     let stringURL:String = "http://localhost:8080"
+    
+    var selectedPlaceLatitude:Double = 0.0
+    var selectedPlaceLongitude:Double = 0.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -106,6 +109,49 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                                                                              longitude: newPlaceLongitude)
                         
                         self.setPlaceDescriptionData(placeObject: placeObject)
+                        
+                        self.selectedPlaceLatitude = newPlaceLatitude
+                        self.selectedPlaceLongitude = newPlaceLongitude
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
+    func callGetGeoCoordinates(placeName: String) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
+        let _:Bool = asyncConnect.getPlaceDescription(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        let jsonDict: [String:AnyObject] = (dict!["result"] as? [String:AnyObject])!
+                        
+                        let newPlaceLatitude: Double = jsonDict["latitude"] as! Double
+                        let newPlaceLongitude: Double = jsonDict["longitude"] as! Double
+                        
+                        let initialBearing: Double = self.calculateInitialBearing(firstLatitude: self.selectedPlaceLatitude,
+                                                                        firstLongitude: self.selectedPlaceLongitude,
+                                                                        secondLatitude: newPlaceLatitude,
+                                                                        secondLongitude: newPlaceLongitude)
+                        
+                        let greatCircle: Double = self.calculateGreatCircle(firstLatitude: self.selectedPlaceLatitude,
+                                                                  firstLongitude: self.selectedPlaceLongitude,
+                                                                  secondLatitude: newPlaceLatitude,
+                                                                  secondLongitude: newPlaceLongitude)
+                        
+                        NSLog("Place: " + self.selectedPlace + "Initial Bearing: " + String(initialBearing))
+                        NSLog("Place: " + self.selectedPlace + "Great Circle: " + String(greatCircle))
+                        
+                        self.lblDistance.text = String("Distance: " + String(initialBearing))
+                        self.lblBearing.text = String("Initial Bearing: " + String(greatCircle))
                         
                     } catch {
                         print("invalid data format received")
@@ -282,26 +328,19 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        NSLog("Place: " + selectedPlace + "Initial Bearing: " + String(calculateInitialBearing(firstPlace: selectedPlace, secondPlace: _placeArray[row])))
-        NSLog("Place: " + selectedPlace + "Great Circle:" + String(calculateGreatCircle(firstPlace: selectedPlace, secondPlace: _placeArray[row])))
-        
-        lblDistance.text = String("Distance: " + String(calculateGreatCircle(firstPlace: selectedPlace, secondPlace: _placeArray[row])))
-        lblBearing.text = String("Initial Bearing: " + String(calculateInitialBearing(firstPlace: selectedPlace, secondPlace: _placeArray[row])))
+        callGetGeoCoordinates(placeName: _placeArray[row])
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
     
-    func calculateGreatCircle(firstPlace: String, secondPlace: String) -> Double{
+    func calculateGreatCircle(firstLatitude: Double,
+                              firstLongitude: Double,
+                              secondLatitude: Double,
+                              secondLongitude: Double) -> Double{
         var greatDistance: Double
         let toRadians: Double = M_PI / 180
-        
-        let firstLatitude: Double = (_placeDictionary[firstPlace]?.latitude)!
-        let firstLongitude: Double = (_placeDictionary[firstPlace]?.longitude)!
-        
-        let secondLatitude: Double = (_placeDictionary[secondPlace]?.latitude)!
-        let secondLongitude: Double = (_placeDictionary[secondPlace]?.longitude)!
         
         let rValue: Double = 6371 * pow(10, 3)
         
@@ -320,14 +359,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         return greatDistance
     }
     
-    func calculateInitialBearing(firstPlace: String, secondPlace: String) -> Double{
+    func calculateInitialBearing(firstLatitude: Double,
+                                 firstLongitude: Double,
+                                 secondLatitude: Double,
+                                 secondLongitude: Double) -> Double{
         var bearing: Double
-        
-        let firstLatitude: Double = (_placeDictionary[firstPlace]?.latitude)!
-        let firstLongitude: Double = (_placeDictionary[firstPlace]?.longitude)!
-        
-        let secondLatitude: Double = (_placeDictionary[secondPlace]?.latitude)!
-        let secondLongitude: Double = (_placeDictionary[secondPlace]?.longitude)!
         
         let toRadians: Double = M_PI / 180
         
