@@ -22,15 +22,9 @@
 
 import UIKit
 
-let placeLibraryObject = PlaceLibrary()
-
-var _placeDictionary: [String: PlaceDescription] = placeLibraryObject.getPlaces()//[:]
-
 var _placeArray: [String] = [String]()
 
 var _segueIdentity = ""
-
-let stringURL:String = "http://localhost:8080"
 
 class TableViewController: UITableViewController {
     
@@ -38,9 +32,7 @@ class TableViewController: UITableViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //_placeArray = Array(_placeDictionary.keys)
-        
+                
         navigationItem.leftBarButtonItem = editButtonItem
         
         let plusButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.add, target: self, action: #selector (TableViewController.addPlace))
@@ -55,30 +47,6 @@ class TableViewController: UITableViewController {
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem()
-    }
-    
-    func callGetNames(){
-        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
-        
-        let _:Bool = asyncConnect.getAllPlaces(callback: {(res: String, error: String?) -> Void in
-            if error != nil {
-                NSLog("Error", error!)
-            }
-            else {
-                NSLog(res)
-                
-                if let data: Data = res.data(using: String.Encoding.utf8) {
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                        
-                        _placeArray = (dict!["result"] as? [String])!
-                        self.mainTableView.reloadData()
-                    } catch {
-                        print("invalid data format received")
-                    }
-                }
-            }
-        })
     }
     
     func addPlace(){
@@ -107,12 +75,13 @@ class TableViewController: UITableViewController {
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            _placeDictionary.removeValue(forKey: _placeArray[indexPath.row])
+            let placeName: String = _placeArray[indexPath.row]
+            self.callRemovePlace(placeName: placeName)
+            
             _placeArray.remove(at: indexPath.row)
+            
             tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+        }
     }
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -127,10 +96,60 @@ class TableViewController: UITableViewController {
     
     override func viewDidAppear(_ animated: Bool) {
         NSLog("TableViewController: viewDidAppear")
-        NSLog("Place Dictionary Keys: " + String(_placeDictionary.count))
-        //_placeArray = Array(_placeDictionary.keys)
         self.callGetNames()
         mainTableView.reloadData()
+    }
+    
+    func callGetNames(){
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        
+        let _:Bool = asyncConnect.getAllPlaces(callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                
+                if let data: Data = res.data(using: String.Encoding.utf8) {
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        _placeArray = (dict!["result"] as? [String])!
+                        self.mainTableView.reloadData()
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
+    func callRemovePlace(placeName: String) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        let _:Bool = asyncConnect.removePlace(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        if ((dict?["result"]) != nil){
+                            NSLog("Place Removed")
+                            self.mainTableView.reloadData()
+                        }
+                        else {
+                            NSLog("Place is not removed")
+                        }
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
     }
     
 }

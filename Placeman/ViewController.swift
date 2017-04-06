@@ -41,8 +41,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     var selectedPlace = ""
     
-    let stringURL:String = "http://localhost:8080"
-    
     var selectedPlaceLatitude:Double = 0.0
     var selectedPlaceLongitude:Double = 0.0
 
@@ -61,9 +59,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             
             NSLog("Incoming Segue: " + _segueIdentity)
             callGetPlaceDescription(placeName: selectedPlace)
-            
-            //let selectedPlaceObject: PlaceDescription = getPlaceDescriptionData(placeName: selectedPlace)
-            
         }
         else if _segueIdentity == "addButtonSegue" {
             pvPlaces.isHidden = true
@@ -76,152 +71,12 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         // Do any additional setup after loading the view, typically from a nib.
     }
     
-    func callGetPlaceDescription(placeName: String) {
-        
-        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
-        let _:Bool = asyncConnect.getPlaceDescription(name: placeName, callback: {(res: String, error: String?) -> Void in
-            if error != nil {
-                NSLog("Error", error!)
-            }
-            else {
-                NSLog(res)
-                if let data: Data = res.data(using: String.Encoding.utf8){
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                        let jsonDict: [String:AnyObject] = (dict!["result"] as? [String:AnyObject])!
-                        
-                        let newPlaceName: String = jsonDict["name"] as! String
-                        let newPlaceDesc: String = jsonDict["description"] as! String
-                        let newPlaceCategory: String = jsonDict["category"] as! String
-                        let newPlaceAddressTitle: String = jsonDict["address-title"] as! String
-                        let newPlaceAddressStreet: String = jsonDict["address-street"] as! String
-                        let newPlaceElevation: Double = jsonDict["elevation"] as! Double
-                        let newPlaceLatitude: Double = jsonDict["latitude"] as! Double
-                        let newPlaceLongitude: Double = jsonDict["longitude"] as! Double
-                        
-                        let placeObject: PlaceDescription = PlaceDescription(name: newPlaceName,
-                                                                             description: newPlaceDesc,
-                                                                             category: newPlaceCategory,
-                                                                             address_title: newPlaceAddressTitle,
-                                                                             address_street: newPlaceAddressStreet,
-                                                                             elevation: newPlaceElevation,
-                                                                             latitude: newPlaceLatitude,
-                                                                             longitude: newPlaceLongitude)
-                        
-                        self.setPlaceDescriptionData(placeObject: placeObject)
-                        
-                        self.selectedPlaceLatitude = newPlaceLatitude
-                        self.selectedPlaceLongitude = newPlaceLongitude
-                        
-                    } catch {
-                        print("invalid data format received")
-                    }
-                }
-            }
-        })
-    }
-    
-    func callGetGeoCoordinates(placeName: String) {
-        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
-        let _:Bool = asyncConnect.getPlaceDescription(name: placeName, callback: {(res: String, error: String?) -> Void in
-            if error != nil {
-                NSLog("Error", error!)
-            }
-            else {
-                NSLog(res)
-                if let data: Data = res.data(using: String.Encoding.utf8){
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                        let jsonDict: [String:AnyObject] = (dict!["result"] as? [String:AnyObject])!
-                        
-                        let newPlaceLatitude: Double = jsonDict["latitude"] as! Double
-                        let newPlaceLongitude: Double = jsonDict["longitude"] as! Double
-                        
-                        let initialBearing: Double = self.calculateInitialBearing(firstLatitude: self.selectedPlaceLatitude,
-                                                                        firstLongitude: self.selectedPlaceLongitude,
-                                                                        secondLatitude: newPlaceLatitude,
-                                                                        secondLongitude: newPlaceLongitude)
-                        
-                        let greatCircle: Double = self.calculateGreatCircle(firstLatitude: self.selectedPlaceLatitude,
-                                                                  firstLongitude: self.selectedPlaceLongitude,
-                                                                  secondLatitude: newPlaceLatitude,
-                                                                  secondLongitude: newPlaceLongitude)
-                        
-                        NSLog("Place: " + self.selectedPlace + "Initial Bearing: " + String(initialBearing))
-                        NSLog("Place: " + self.selectedPlace + "Great Circle: " + String(greatCircle))
-                        
-                        self.lblDistance.text = String("Distance: " + String(initialBearing))
-                        self.lblBearing.text = String("Initial Bearing: " + String(greatCircle))
-                        
-                    } catch {
-                        print("invalid data format received")
-                    }
-                }
-            }
-        })
-    }
-    
-    func callRemovePlace(placeName: String) {
-        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
-        let _:Bool = asyncConnect.removePlace(name: placeName, callback: {(res: String, error: String?) -> Void in
-            if error != nil {
-                NSLog("Error", error!)
-            }
-            else {
-                NSLog(res)
-                if let data: Data = res.data(using: String.Encoding.utf8){
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                        
-                        if ((dict?["result"]) != nil){
-                            NSLog("Place Removed")
-                        }
-                        else {
-                            NSLog("Place is not removed")
-                        }
-                        
-                    } catch {
-                        print("invalid data format received")
-                    }
-                }
-            }
-        })
-    }
-    
-    func callAddPlace(newPlace: [String:Any]) {
-        let asyncConnect:MakeHttpConnection = MakeHttpConnection(stringURL: stringURL)
-        let _:Bool = asyncConnect.addPlace(placeDict: newPlace , callback: {(res: String, error: String?) -> Void in
-            if error != nil {
-                NSLog("Error", error!)
-            }
-            else {
-                NSLog(res)
-                if let data: Data = res.data(using: String.Encoding.utf8){
-                    do {
-                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
-                        
-                        if ((dict?["result"]) != nil){
-                            NSLog("Place Added")
-                        }
-                        else {
-                            NSLog("Place is not added")
-                        }
-                        
-                    } catch {
-                        print("invalid data format received")
-                    }
-                }
-            }
-        })
-    }
-    
     func dismissOpenKeyboard(){
         self.view.endEditing(true)
     }
     
     @IBAction func clickedBtnRemove(_ sender: Any) {
         self.callRemovePlace(placeName: selectedPlace)
-        _placeDictionary.removeValue(forKey: selectedPlace)
     }
     
     @IBAction func clickedBtnSave(_ sender: Any) {
@@ -238,15 +93,6 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
             let newPlaceLatitude: Double = Double(tfLatitude.text!)!
             let newPlaceLongitude: Double = Double(tfLongitude.text!)!
             
-            let newPlaceObject: PlaceDescription = PlaceDescription(name: newPlaceName,
-                                                                    description: newPlaceDescription,
-                                                                    category: newPlaceCategory,
-                                                                    address_title: newPlaceAddressTitle,
-                                                                    address_street: newPlaceAddressStreet,
-                                                                    elevation: newPlaceElevation,
-                                                                    latitude: newPlaceLatitude,
-                                                                    longitude: newPlaceLongitude)
-            
             let placeDict: [String: Any] = [
                 "name": newPlaceName,
                 "description": newPlaceDescription,
@@ -258,9 +104,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
                 "longitude": newPlaceLongitude
             ] as [String: Any]
             
-            self.callAddPlace(newPlace: placeDict)
+            if _segueIdentity == "goToPlace" {
+                self.callRemovePlace(placeName: selectedPlace)
+            }
             
-            _placeDictionary[newPlaceName] = newPlaceObject
+            self.callAddPlace(newPlace: placeDict)
             
             performSegue(withIdentifier: "gotoHomeScreen", sender: self)
             
@@ -367,11 +215,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         
         return isValidated
     }
-    
-    func getPlaceDescriptionData(placeName: String) -> PlaceDescription{
-        return _placeDictionary[placeName]!
-    }
-    
+        
     func setPlaceDescriptionData(placeObject: PlaceDescription){
         tfName.text = placeObject.name
         tfDescription.text = placeObject.description
@@ -450,7 +294,144 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
         
         return bearing
     }
-
-
+    
+    func callGetPlaceDescription(placeName: String) {
+        
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        let _:Bool = asyncConnect.getPlaceDescription(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        let jsonDict: [String:AnyObject] = (dict!["result"] as? [String:AnyObject])!
+                        
+                        let newPlaceName: String = jsonDict["name"] as! String
+                        let newPlaceDesc: String = jsonDict["description"] as! String
+                        let newPlaceCategory: String = jsonDict["category"] as! String
+                        let newPlaceAddressTitle: String = jsonDict["address-title"] as! String
+                        let newPlaceAddressStreet: String = jsonDict["address-street"] as! String
+                        let newPlaceElevation: Double = jsonDict["elevation"] as! Double
+                        let newPlaceLatitude: Double = jsonDict["latitude"] as! Double
+                        let newPlaceLongitude: Double = jsonDict["longitude"] as! Double
+                        
+                        let placeObject: PlaceDescription = PlaceDescription(name: newPlaceName,
+                                                                             description: newPlaceDesc,
+                                                                             category: newPlaceCategory,
+                                                                             address_title: newPlaceAddressTitle,
+                                                                             address_street: newPlaceAddressStreet,
+                                                                             elevation: newPlaceElevation,
+                                                                             latitude: newPlaceLatitude,
+                                                                             longitude: newPlaceLongitude)
+                        
+                        self.setPlaceDescriptionData(placeObject: placeObject)
+                        
+                        self.selectedPlaceLatitude = newPlaceLatitude
+                        self.selectedPlaceLongitude = newPlaceLongitude
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
+    func callGetGeoCoordinates(placeName: String) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        let _:Bool = asyncConnect.getPlaceDescription(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        let jsonDict: [String:AnyObject] = (dict!["result"] as? [String:AnyObject])!
+                        
+                        let newPlaceLatitude: Double = jsonDict["latitude"] as! Double
+                        let newPlaceLongitude: Double = jsonDict["longitude"] as! Double
+                        
+                        let initialBearing: Double = self.calculateInitialBearing(firstLatitude: self.selectedPlaceLatitude,
+                                                                                  firstLongitude: self.selectedPlaceLongitude,
+                                                                                  secondLatitude: newPlaceLatitude,
+                                                                                  secondLongitude: newPlaceLongitude)
+                        
+                        let greatCircle: Double = self.calculateGreatCircle(firstLatitude: self.selectedPlaceLatitude,
+                                                                            firstLongitude: self.selectedPlaceLongitude,
+                                                                            secondLatitude: newPlaceLatitude,
+                                                                            secondLongitude: newPlaceLongitude)
+                        
+                        NSLog("Place: " + self.selectedPlace + "Initial Bearing: " + String(initialBearing))
+                        NSLog("Place: " + self.selectedPlace + "Great Circle: " + String(greatCircle))
+                        
+                        self.lblDistance.text = String("Distance: " + String(initialBearing))
+                        self.lblBearing.text = String("Initial Bearing: " + String(greatCircle))
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
+    func callRemovePlace(placeName: String) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        let _:Bool = asyncConnect.removePlace(name: placeName, callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        if ((dict?["result"]) != nil){
+                            NSLog("Place Removed")
+                        }
+                        else {
+                            NSLog("Place is not removed")
+                        }
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
+    
+    func callAddPlace(newPlace: [String:Any]) {
+        let asyncConnect:MakeHttpConnection = MakeHttpConnection()
+        let _:Bool = asyncConnect.addPlace(placeDict: newPlace , callback: {(res: String, error: String?) -> Void in
+            if error != nil {
+                NSLog("Error", error!)
+            }
+            else {
+                NSLog(res)
+                if let data: Data = res.data(using: String.Encoding.utf8){
+                    do {
+                        let dict = try JSONSerialization.jsonObject(with: data, options: .mutableContainers) as? [String:AnyObject]
+                        
+                        if ((dict?["result"]) != nil){
+                            NSLog("Place Added")
+                        }
+                        else {
+                            NSLog("Place is not added")
+                        }
+                        
+                    } catch {
+                        print("invalid data format received")
+                    }
+                }
+            }
+        })
+    }
 }
 

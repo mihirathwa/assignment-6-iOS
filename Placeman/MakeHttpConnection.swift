@@ -9,10 +9,11 @@
 import Foundation
 
 class MakeHttpConnection {
-    var url:String
+    let url:String = "http://localhost:8080"
     
-    init (stringURL: String) {
-        self.url = stringURL
+    func getStringURL(){
+        let infoPlist = Bundle.main.infoDictionary
+        let config = infoPlist?["URL Types"] as? Dictionary<String, AnyObject>
     }
     
     func asyncHttpPostJSON(url: String, data: Data, completion: @escaping (String, String?) -> Void) {
