@@ -16,7 +16,6 @@
 		FBE6C6051E691DD700F25929 /* PlacemanUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE6C6041E691DD700F25929 /* PlacemanUITests.swift */; };
 		FBE6C6131E691E4100F25929 /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE6C6121E691E4100F25929 /* TableViewController.swift */; };
 		FBE6C6151E691E8900F25929 /* PlaceDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBE6C6141E691E8900F25929 /* PlaceDescription.swift */; };
-		FBE6C6191E6921A500F25929 /* places.json in Resources */ = {isa = PBXBuildFile; fileRef = FBE6C6181E6921A500F25929 /* places.json */; };
 		FBF7A2E71E6A22A400392C03 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FBF7A2E51E6A22A400392C03 /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
@@ -53,7 +52,6 @@
 		FBE6C6061E691DD700F25929 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FBE6C6121E691E4100F25929 /* TableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		FBE6C6141E691E8900F25929 /* PlaceDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaceDescription.swift; sourceTree = "<group>"; };
-		FBE6C6181E6921A500F25929 /* places.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = places.json; sourceTree = "<group>"; };
 		FBF7A2E61E6A22A400392C03 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -113,7 +111,6 @@
 				FBE6C5F01E691DD700F25929 /* Info.plist */,
 				FBE6C6121E691E4100F25929 /* TableViewController.swift */,
 				FBE6C6141E691E8900F25929 /* PlaceDescription.swift */,
-				FBE6C6181E6921A500F25929 /* places.json */,
 				FB627DA71E949F78007FEEDA /* MakeHttpConnection.swift */,
 			);
 			path = Placeman;
@@ -246,7 +243,6 @@
 			files = (
 				FBE6C5EF1E691DD700F25929 /* LaunchScreen.storyboard in Resources */,
 				FBE6C5EC1E691DD700F25929 /* Assets.xcassets in Resources */,
-				FBE6C6191E6921A500F25929 /* places.json in Resources */,
 				FBF7A2E71E6A22A400392C03 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -5,7 +5,7 @@
 // purpose of determining grade and program assessment.
 //
 // Purpose: This file contains the TableView Controller class as described
-// in Assignment 4, it displays the list of Places from JSON and updates on edits
+// in Assignment 6, it displays the list of Places from JSON RPC Place Server
 //
 // Ser423 Mobile Applications
 // see http://pooh.poly.asu.edu/Mobile

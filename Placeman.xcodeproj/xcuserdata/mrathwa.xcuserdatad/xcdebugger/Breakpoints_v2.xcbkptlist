@@ -6,15 +6,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Placeman/MakeHttpConnection.swift"
-            timestampString = "513136885.053663"
+            timestampString = "513143589.591908"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "29"
-            endingLineNumber = "29"
+            startingLineNumber = "21"
+            endingLineNumber = "21"
             landmarkName = "getStringURL()"
             landmarkType = "7">
          </BreakpointContent>

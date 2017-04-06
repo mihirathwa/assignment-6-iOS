@@ -5,8 +5,8 @@
 // purpose of determining grade and program assessment.
 //
 // Purpose: This file contains the View Controller class as described
-// in Assignment 4, it displays the descriptions of Places with ability
-// edit fields and remove places
+// in Assignment 6, it displays the descriptions of Places with ability
+// edit fields and remove places, all calls made to the JSON RPC Server
 //
 // Ser423 Mobile Applications
 // see http://pooh.poly.asu.edu/Mobile
