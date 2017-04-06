@@ -11,9 +11,22 @@ import Foundation
 class MakeHttpConnection {
     let url:String = "http://localhost:8080"
     
+    init() {
+        getStringURL()
+    }
+    
     func getStringURL(){
-        let infoPlist = Bundle.main.infoDictionary
-        let config = infoPlist?["URL Types"] as? Dictionary<String, AnyObject>
+//        let infoPlist = Bundle.main.infoDictionary
+//        let cfBundleURL = infoPlist?["CFBundleURLTypes"] as? [String]
+//        let urlDict = cfBundleURL as? Dictionary<String, String>
+//        
+//        let myURL = urlDict?["CFBundleURLName"]
+        
+        let urlTypesArray = Bundle.main.object(forInfoDictionaryKey: "CFBundleURLTypes")
+        
+        //let urlValue = urlTypesArray[0]["CFBundleURLName"]
+        
+        print("URL Value -->")
     }
     
     func asyncHttpPostJSON(url: String, data: Data, completion: @escaping (String, String?) -> Void) {
